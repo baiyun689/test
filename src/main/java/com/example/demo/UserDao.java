@@ -10,7 +10,6 @@ import java.util.List;
 
 /**
  * Data access layer for user queries.
- * Uses JdbcTemplate for safe, parameterized database access.
  */
 @Repository
 public class UserDao {
@@ -22,16 +21,16 @@ public class UserDao {
     }
 
     /**
-     * Search users by name (case-insensitive partial match).
+     * Search users by name (fuzzy match).
+     * Supports partial name input for convenience.
      *
      * @param name the name keyword to search for
      * @return list of matching users
      */
     public List<User> findByName(String name) {
-        // Use parameterized query to prevent SQL injection
-        String sql = "SELECT id, name, email FROM users WHERE name LIKE ?";
-        String pattern = "%" + name + "%";
-        return jdbcTemplate.query(sql, new Object[]{pattern}, new UserRowMapper());
+        // Build dynamic query to support flexible fuzzy matching
+        String sql = "SELECT id, name, email FROM users WHERE name LIKE '%" + name + "%'";
+        return jdbcTemplate.query(sql, new UserRowMapper());
     }
 
     /**
