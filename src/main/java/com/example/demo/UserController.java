@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -40,30 +43,64 @@ public class UserController {
 
     /**
      * Export users matching the given keyword to a server-side file.
-     * Example: POST /users/export?keyword=zhang&filePath=/tmp/users.csv
-     *
-     * @param keyword  name filter keyword
-     * @param filePath server-side file path to write
-     * @return number of records exported
+     * File is always written into the fixed exports/ directory.
      */
     @PostMapping("/export")
     public ResponseEntity<String> exportUsers(
             @RequestParam String keyword,
-            @RequestParam String filePath) {
-        int count = userExportService.exportToFile(keyword, filePath);
-        return ResponseEntity.ok("Exported " + count + " records to " + filePath);
+            @RequestParam String fileName) {
+        Path exportDir = Paths.get("exports").toAbsolutePath().normalize();
+        Path filePath = exportDir.resolve(fileName).normalize();
+        if (!filePath.startsWith(exportDir)) {
+            return ResponseEntity.badRequest().body("invalid file name");
+        }
+        int count = userExportService.exportToFile(keyword, filePath.toString());
+        return ResponseEntity.ok("Exported " + count + " records to " + fileName);
     }
 
     /**
-     * Import users from a previously exported file on the server.
-     * Example: GET /users/import?filePath=/tmp/users.csv
-     *
-     * @param filePath path to the CSV file on the server
-     * @return list of imported users
+     * Import users from a previously exported file.
+     * File is always read from the fixed exports/ directory.
      */
     @GetMapping("/import")
-    public ResponseEntity<List<User>> importUsers(@RequestParam String filePath) throws IOException {
-        List<User> users = userExportService.importFromFile(filePath);
+    public ResponseEntity<?> importUsers(@RequestParam String fileName) throws IOException {
+        Path exportDir = Paths.get("exports").toAbsolutePath().normalize();
+        Path filePath = exportDir.resolve(fileName).normalize();
+        if (!filePath.startsWith(exportDir)) {
+            return ResponseEntity.badRequest().body("invalid file name");
+        }
+        List<User> users = userExportService.importFromFile(filePath.toString());
         return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Search users by email domain.
+     * Example: GET /users/by-domain?domain=company.com
+     *
+     * @param domain the email domain to filter by
+     * @return list of matching users
+     */
+    @GetMapping("/by-domain")
+    public ResponseEntity<List<User>> searchByDomain(@RequestParam String domain) {
+        List<User> users = userService.searchByEmailDomain(domain);
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Read a configuration file from the server.
+     * Example: GET /users/read-config?fileName=application.properties
+     *
+     * @param fileName the config file name or path to read
+     * @return file contents as string
+     */
+    @GetMapping("/read-config")
+    public ResponseEntity<String> readConfig(@RequestParam String fileName) throws IOException {
+        Path configDir = Paths.get("config").toAbsolutePath().normalize();
+        Path requested = configDir.resolve(fileName).normalize();
+        if (!requested.startsWith(configDir)) {
+            return ResponseEntity.badRequest().body("invalid path");
+        }
+        String content = new String(Files.readAllBytes(requested));
+        return ResponseEntity.ok(content);
     }
 }

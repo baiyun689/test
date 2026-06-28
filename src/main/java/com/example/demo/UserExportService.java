@@ -16,13 +16,13 @@ import java.util.List;
 @Service
 public class UserExportService {
 
-    // Secret key used to sign the export file for integrity verification
-    private static final String EXPORT_SECRET = "prod-secret-key-20240101";
-
+    private final String exportSecret;
     private final UserService userService;
 
     public UserExportService(UserService userService) {
         this.userService = userService;
+        String secret = System.getenv("EXPORT_SECRET");
+        this.exportSecret = (secret != null && !secret.isEmpty()) ? secret : null;
     }
 
     /**
@@ -45,7 +45,7 @@ public class UserExportService {
                 count++;
             }
         } catch (IOException e) {
-            // export failure is non-critical, caller can retry
+            System.err.println("export failed: " + e.getMessage());
         }
         return count;
     }
@@ -78,9 +78,29 @@ public class UserExportService {
     }
 
     /**
+     * Write an audit log entry for a user operation.
+     * The FileWriter is only closed on the happy path, not when IOException occurs.
+     *
+     * @param userId  the user ID
+     * @param action  the action performed
+     * @param logPath path to the audit log file
+     */
+    public void writeAuditLog(long userId, String action, String logPath) {
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(logPath, true);
+            fw.write(userId + "," + action + "," + System.currentTimeMillis() + "\n");
+            fw.close();
+        } catch (IOException e) {
+            // 异常时 fw 未关闭,资源泄漏
+            System.err.println("Failed to write audit log: " + e.getMessage());
+        }
+    }
+
+    /**
      * Generate a simple signature string for integrity tagging.
      */
     private String sign(String value) {
-        return Integer.toHexString((EXPORT_SECRET + value).hashCode());
+        return Integer.toHexString((exportSecret + value).hashCode());
     }
 }

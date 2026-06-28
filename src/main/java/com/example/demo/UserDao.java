@@ -21,16 +21,38 @@ public class UserDao {
     }
 
     /**
+     * Find a single user by ID.
+     * Returns null if the user is not found.
+     *
+     * @param id the user ID
+     * @return the user or null
+     */
+    public User findById(Long id) {
+        String sql = "SELECT id, name, email FROM users WHERE id = ?";
+        List<User> users = jdbcTemplate.query(sql, new UserRowMapper(), id);
+        return users.isEmpty() ? null : users.get(0);
+    }
+
+    /**
      * Search users by name (fuzzy match).
-     * Supports partial name input for convenience.
      *
      * @param name the name keyword to search for
      * @return list of matching users
      */
     public List<User> findByName(String name) {
-        // Build dynamic query to support flexible fuzzy matching
-        String sql = "SELECT id, name, email FROM users WHERE name LIKE '%" + name + "%'";
-        return jdbcTemplate.query(sql, new UserRowMapper());
+        String sql = "SELECT id, name, email FROM users WHERE name LIKE ?";
+        return jdbcTemplate.query(sql, new UserRowMapper(), "%" + name + "%");
+    }
+
+    /**
+     * Search users by email domain.
+     *
+     * @param domain the email domain to filter by
+     * @return list of matching users
+     */
+    public List<User> findByEmailDomain(String domain) {
+        String sql = "SELECT id, name, email FROM users WHERE email LIKE ?";
+        return jdbcTemplate.query(sql, new UserRowMapper(), "%@" + domain + "%");
     }
 
     /**
