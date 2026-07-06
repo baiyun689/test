@@ -103,4 +103,25 @@ public class UserExportService {
     private String sign(String value) {
         return Integer.toHexString((exportSecret + value).hashCode());
     }
+
+    /**
+     * 将两个导出文件合并为一个。
+     * BUG: FileInputStream 未用 try-with-resources，异常路径下泄漏文件句柄。
+     */
+    public void mergeFiles(String pathA, String pathB, String outputPath) throws IOException {
+        java.io.FileInputStream fisA = new java.io.FileInputStream(pathA);
+        java.io.FileInputStream fisB = new java.io.FileInputStream(pathB);
+        FileWriter fw = new FileWriter(outputPath);
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = fisA.read(buf)) != -1) {
+            fw.write(new String(buf, 0, n));
+        }
+        while ((n = fisB.read(buf)) != -1) {
+            fw.write(new String(buf, 0, n));
+        }
+        fw.close();
+        fisA.close();
+        fisB.close();
+    }
 }
