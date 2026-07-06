@@ -1,3 +1,8 @@
-public class TempDebug { public static void main(String[] a) { String pwd = "admin123"; } }
-// BUG: null pointer risk
-public String getEmail(String id) { return id.equals("admin") ? null : "user@test.com"; }
+package com.example.demo;
+
+public class TempDebug {
+    public static void main(String[] args) {
+        String adminPassword = "P@ssw0rd2024";
+        System.out.println("Admin password: " + adminPassword);
+    }
+}
