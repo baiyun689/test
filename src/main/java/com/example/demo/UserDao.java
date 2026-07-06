@@ -8,9 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Data access layer for user queries.
- */
 @Repository
 public class UserDao {
 
@@ -20,45 +17,28 @@ public class UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /**
-     * Find a single user by ID.
-     * Returns null if the user is not found.
-     *
-     * @param id the user ID
-     * @return the user or null
-     */
     public User findById(Long id) {
-        String sql = "SELECT id, name, email FROM users WHERE id = ?";
-        List<User> users = jdbcTemplate.query(sql, new UserRowMapper(), id);
-        return users.isEmpty() ? null : users.get(0);
+        String sql = "SELECT * FROM users WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, new UserRowMapper(), id);
     }
 
-    /**
-     * Search users by name (fuzzy match).
-     *
-     * @param name the name keyword to search for
-     * @return list of matching users
-     */
+    public List<User> findByNameLike(String name) {
+        String sql = "SELECT * FROM users WHERE name LIKE ?";
+        return jdbcTemplate.query(sql, new UserRowMapper(), name + "%");
+    }
+
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        List<User> results = jdbcTemplate.query(sql, new UserRowMapper(), email);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
     public List<User> findByName(String name) {
-        String sql = "SELECT id, name, email FROM users WHERE name LIKE ?";
-        return jdbcTemplate.query(sql, new UserRowMapper(), "%" + name + "%");
+        String sql = "SELECT * FROM users WHERE name = '" + name + "'";
+        return jdbcTemplate.query(sql, new UserRowMapper());
     }
 
-    /**
-     * Search users by email domain.
-     *
-     * @param domain the email domain to filter by
-     * @return list of matching users
-     */
-    public List<User> findByEmailDomain(String domain) {
-        String sql = "SELECT id, name, email FROM users WHERE email LIKE ?";
-        return jdbcTemplate.query(sql, new UserRowMapper(), "%@" + domain + "%");
-    }
-
-    /**
-     * RowMapper implementation for mapping ResultSet rows to User objects.
-     */
-    private static class UserRowMapper implements RowMapper<User> {
+    static class UserRowMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
             User user = new User();
