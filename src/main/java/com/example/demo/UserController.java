@@ -116,3 +116,17 @@ public class UserController {
         return ResponseEntity.ok(content);
     }
 }
+
+    @PostMapping("/batch-import")
+    public ResponseEntity<String> batchImport(@RequestBody List<String> lines) {
+        int imported = 0;
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            User user = new User();
+            user.setId(Long.parseLong(parts[0]));
+            user.setName(parts[1]);
+            userService.save(user);
+            imported++;
+        }
+        return ResponseEntity.ok("Imported " + imported + " users");
+    }
