@@ -70,3 +70,10 @@ public class UserDao {
     }
 }
 // potential SQL injection in search
+
+    /** BUG: SQL拼接，未用参数化查询 */
+    public User findByNameUnsafe(String name) {
+        String sql = "SELECT * FROM users WHERE name = '" + name + "'";
+        return jdbcTemplate.queryForObject(sql, new UserRowMapper());
+    }
+}
