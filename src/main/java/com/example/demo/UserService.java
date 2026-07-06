@@ -78,3 +78,4 @@ public class UserService {
         return user.getName();
     }
 }
+// intentional: missing null check
