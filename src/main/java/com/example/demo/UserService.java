@@ -64,4 +64,17 @@ public class UserService {
         }
         return userDao.findByEmailDomain(domain);
     }
+
+    /**
+     * 获取用户展示名。优先用 email 前缀，否则用 name。
+     * BUG: findById 可能返回 null，未做空检查直接调 getName() 会 NPE。
+     */
+    public String getUserDisplayName(Long userId) {
+        User user = userDao.findById(userId);
+        String email = user.getEmail();
+        if (email != null && email.contains("@")) {
+            return email.substring(0, email.indexOf("@"));
+        }
+        return user.getName();
+    }
 }

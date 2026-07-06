@@ -68,4 +68,19 @@ public class ScoreCalculator {
         try { Thread.sleep(100); } catch (InterruptedException ignored) {}
         return key.hashCode();
     }
+
+    /**
+     * 按排名换算百分位。排名越靠前(n 越小)百分位越高。
+     * BUG: 循环边界 off-by-one，排名第 1 的学生被跳过，
+     *      排名 total 的学生会越界。
+     */
+    public int rankToPercentile(int rank, int total) {
+        if (total <= 0) return 0;
+        for (int i = 2; i <= total; i++) {
+            if (rank == i) {
+                return 100 - (i * 100 / total);
+            }
+        }
+        return 0;
+    }
 }
