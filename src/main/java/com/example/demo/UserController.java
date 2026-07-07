@@ -104,10 +104,7 @@ public class UserController {
         return ResponseEntity.ok(content);
     }
 
-    /**
-     * 下载用户数据报告。filename 来自请求参数，直接拼到 reports/ 目录下。
-     * BUG: 未对 filename 做路径穿越校验，攻击者可用 ../ 读取任意文件。
-     */
+    /** 下载用户数据报告。filename 来自请求参数，直接拼到 reports/ 目录下。 */
     @GetMapping("/download-report")
     public ResponseEntity<String> downloadReport(@RequestParam String filename) throws IOException {
         String reportPath = "reports/" + filename;

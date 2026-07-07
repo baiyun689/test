@@ -43,7 +43,6 @@ public class UserService {
         StringBuilder sb = new StringBuilder();
         for (Long id : userIds) {
             User user = userDao.findById(id);
-            // 未检查 user 是否为 null,可能 NPE
             if (sb.length() > 0) {
                 sb.append(",");
             }
@@ -65,10 +64,7 @@ public class UserService {
         return userDao.findByEmailDomain(domain);
     }
 
-    /**
-     * 获取用户展示名。优先用 email 前缀，否则用 name。
-     * BUG: findById 可能返回 null，未做空检查直接调 getName() 会 NPE。
-     */
+    /** 获取用户展示名。优先用 email 前缀，否则用 name。 */
     public String getUserDisplayName(Long userId) {
         User user = userDao.findById(userId);
         String email = user.getEmail();
@@ -78,4 +74,3 @@ public class UserService {
         return user.getName();
     }
 }
-// intentional: missing null check

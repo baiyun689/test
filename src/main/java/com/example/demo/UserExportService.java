@@ -73,7 +73,6 @@ public class UserExportService {
             u.setEmail(parts[2].trim());
             result.add(u);
         }
-        // reader is never closed: no try-with-resources, no finally block
         return result;
     }
 
@@ -92,7 +91,6 @@ public class UserExportService {
             fw.write(userId + "," + action + "," + System.currentTimeMillis() + "\n");
             fw.close();
         } catch (IOException e) {
-            // 异常时 fw 未关闭,资源泄漏
             System.err.println("Failed to write audit log: " + e.getMessage());
         }
     }
@@ -104,10 +102,7 @@ public class UserExportService {
         return Integer.toHexString((exportSecret + value).hashCode());
     }
 
-    /**
-     * 将两个导出文件合并为一个。
-     * BUG: FileInputStream 未用 try-with-resources，异常路径下泄漏文件句柄。
-     */
+    /** 将两个导出文件合并为一个。 */
     public void mergeFiles(String pathA, String pathB, String outputPath) throws IOException {
         java.io.FileInputStream fisA = new java.io.FileInputStream(pathA);
         java.io.FileInputStream fisB = new java.io.FileInputStream(pathB);
