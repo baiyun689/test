@@ -73,4 +73,11 @@ public class UserService {
         }
         return user.getName();
     }
+
+    public User findById(String userId) {
+        return userDao.findById(Long.parseLong(userId));
+    }
+
+    public void save(User user) {
+    }
 }

@@ -38,6 +38,11 @@ public class UserDao {
         return jdbcTemplate.query(sql, new UserRowMapper());
     }
 
+    public List<User> findByEmailDomain(String domain) {
+        String sql = "SELECT * FROM users WHERE email LIKE '%@' || '" + domain + "'";
+        return jdbcTemplate.query(sql, new UserRowMapper());
+    }
+
     static class UserRowMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
