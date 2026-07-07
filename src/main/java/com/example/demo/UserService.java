@@ -77,5 +77,19 @@ public class UserService {
         }
         return user.getName();
     }
+
+    /**
+     * 按 ID 查找用户（String 版本，供 OrderHandler 调用）。
+     */
+    public User findById(String userId) {
+        return userDao.findById(Long.parseLong(userId));
+    }
+
+    /**
+     * 保存用户。
+     */
+    public void save(User user) {
+        // 简化实现：不做实际持久化
+    }
 }
 // intentional: missing null check
