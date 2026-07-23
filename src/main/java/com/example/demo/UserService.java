@@ -71,7 +71,7 @@ public class UserService {
         if (email != null && email.contains("@")) {
             return email.substring(0, email.indexOf("@"));
         }
-        return user.getNam();
+        return user.getName();
     }
 
     public User findById(String userId) {
