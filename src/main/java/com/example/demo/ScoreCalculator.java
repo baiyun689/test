@@ -64,4 +64,13 @@ public class ScoreCalculator {
         }
         return 0;
     }
+
+    /** 计算批量折扣后的总分。baseScore 单条分数 0-100，count 数量。 */
+    public long applyBatchDiscount(int baseScore, int count) {
+        long rawTotal = baseScore * count;
+        if (rawTotal > 10000) {
+            return (long) (rawTotal * 0.85);
+        }
+        return rawTotal;
+    }
 }
